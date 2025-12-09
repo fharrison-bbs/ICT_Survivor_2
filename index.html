@@ -9,9 +9,16 @@
         window.loadThreeFallback = function() {
             console.warn('Primary Three.js CDN failed, trying fallback...');
             const script = document.createElement('script');
-            script.src = 'https://unpkg.com/three@0.128.0/build/three.min.js';
+            script.src = 'https://unpkg.com/three@r128/build/three.min.js'; // Use consistent version format
             script.onerror = function() {
                 console.error('All Three.js CDN sources failed to load');
+                // Show error modal if fallback also fails
+                setTimeout(() => {
+                    const errorModal = document.getElementById('error-modal');
+                    if (errorModal) {
+                        errorModal.classList.remove('hidden');
+                    }
+                }, 100); // Small delay to ensure DOM is ready
             };
             document.head.appendChild(script);
         };
@@ -273,9 +280,12 @@
             // Check if THREE.js is available
             if (typeof THREE === 'undefined') {
                 console.error('THREE.js library failed to load. Please check your internet connection or disable ad blockers.');
-                // Show error modal instead of alert
-                if (errorModal) {
-                    errorModal.classList.remove('hidden');
+                // Show error modal with defensive check
+                const modal = errorModal || document.getElementById('error-modal');
+                if (modal) {
+                    modal.classList.remove('hidden');
+                } else {
+                    console.error('Error modal not found! Please reload the page.');
                 }
                 return false;
             }
