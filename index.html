@@ -289,10 +289,8 @@
             // Check if THREE.js is available
             if (typeof THREE === 'undefined') {
                 console.error('THREE.js library failed to load. Please check your internet connection or disable ad blockers.');
-                // Use shared error modal display function
-                if (typeof window.showThreeJsErrorModal === 'function') {
-                    window.showThreeJsErrorModal();
-                }
+                // Show error modal using shared function
+                window.showThreeJsErrorModal();
                 return false;
             }
             
