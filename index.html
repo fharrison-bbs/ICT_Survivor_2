@@ -127,7 +127,7 @@
             touchControlsContainer, joystickArea, joystickNub, shootArea,
             ammoText, bombText, biomeText, hudQuestionButton, questionModal, questionText, answerButtons,
             finalQuestionsCorrect, finalQuestionsIncorrect,
-            touchQuestionButton, touchDashButton, touchDashCooldown, touchBombButton; // <-- Added bomb button
+            touchQuestionButton, touchDashButton, touchDashCooldown, touchBombButton, errorModal; // <-- Added error modal
 
         // --- Three.js Variables ---
         let scene, camera3D, renderer, ambientLight, directionalLight;
@@ -191,6 +191,23 @@
                      </div>
                      <button id="restart-button" class="modal-button">Play Again</button>
                 </div>
+                <div id="error-modal" class="modal hidden">
+                     <h2 class="text-4xl sm:text-5xl text-red-500 mb-4">Loading Error!</h2>
+                     <p class="text-lg mb-6">Failed to load required 3D graphics library (Three.js).</p>
+                     <p class="text-sm mb-6">This may be due to:</p>
+                     <ul class="text-left text-sm mb-6 list-disc list-inside">
+                         <li>Ad blockers or browser extensions</li>
+                         <li>Network connectivity issues</li>
+                         <li>Firewall restrictions</li>
+                     </ul>
+                     <p class="text-sm mb-6">Please try:</p>
+                     <ul class="text-left text-sm mb-6 list-disc list-inside">
+                         <li>Disabling ad blockers for this page</li>
+                         <li>Checking your internet connection</li>
+                         <li>Refreshing the page</li>
+                     </ul>
+                     <button id="reload-button" class="modal-button" onclick="location.reload()">Reload Page</button>
+                </div>
             `;
         }
         createUI();
@@ -213,6 +230,7 @@
             levelUpModal = getEl('level-up-modal');
             upgradeOptionsContainer = getEl('upgrade-options-container');
             gameOverModal = getEl('game-over-modal');
+            errorModal = getEl('error-modal'); // <-- Get error modal
             // finalNickname removed
             finalScore = getEl('final-score');
             finalTime = getEl('final-time');
@@ -230,10 +248,26 @@
             touchBombButton = getEl('touch-bomb-button'); // <-- Get bomb button
 
             // Initialize Three.js
-            initThreeJS();
+            const threeJsInitialized = initThreeJS();
+            if (!threeJsInitialized) {
+                // THREE.js failed to load, prevent game from starting
+                console.error('Cannot start game: Three.js initialization failed');
+                return false;
+            }
+            return true;
         }
 
         function initThreeJS() {
+            // Check if THREE.js is available
+            if (typeof THREE === 'undefined') {
+                console.error('THREE.js library failed to load. Please check your internet connection or disable ad blockers.');
+                // Show error modal instead of alert
+                if (errorModal) {
+                    errorModal.classList.remove('hidden');
+                }
+                return false;
+            }
+            
             // Create scene
             scene = new THREE.Scene();
             const biomeInfo = biomes[currentBiome];
@@ -287,6 +321,8 @@
 
             // Handle window resize
             window.addEventListener('resize', onWindowResize, false);
+            
+            return true; // Success
         }
 
         function onWindowResize() {
@@ -859,9 +895,13 @@
         */
 
         // Bootstrapping UI + start
-        initUI();
+        const uiInitialized = initUI();
         // Start the game automatically for quick testing (you can change this behavior)
-        startGame();
+        if (uiInitialized) {
+            startGame();
+        } else {
+            console.error('Game initialization failed. Please reload the page.');
+        }
 
     </script>
 </body>
