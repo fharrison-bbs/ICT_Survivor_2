@@ -5,6 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
     <title>ICT Survivors 3D</title>
     <script>
+        // Utility function to show error modal
+        window.showThreeJsErrorModal = function() {
+            const errorModal = document.getElementById('error-modal');
+            if (errorModal) {
+                errorModal.classList.remove('hidden');
+            } else {
+                console.error('Error modal not found! Please reload the page.');
+            }
+        };
+
         // Fallback loader for Three.js if primary CDN fails
         window.loadThreeFallback = function() {
             console.warn('Primary Three.js CDN failed, trying fallback...');
@@ -12,18 +22,11 @@
             script.src = 'https://unpkg.com/three.js@r128/build/three.min.js'; // Consistent URL format
             script.onerror = function() {
                 console.error('All Three.js CDN sources failed to load');
-                // Show error modal if fallback also fails
-                const showErrorModal = () => {
-                    const errorModal = document.getElementById('error-modal');
-                    if (errorModal) {
-                        errorModal.classList.remove('hidden');
-                    }
-                };
                 // Ensure DOM is ready before showing modal
                 if (document.readyState === 'loading') {
-                    document.addEventListener('DOMContentLoaded', showErrorModal);
+                    document.addEventListener('DOMContentLoaded', window.showThreeJsErrorModal);
                 } else {
-                    showErrorModal();
+                    window.showThreeJsErrorModal();
                 }
             };
             document.head.appendChild(script);
@@ -286,12 +289,9 @@
             // Check if THREE.js is available
             if (typeof THREE === 'undefined') {
                 console.error('THREE.js library failed to load. Please check your internet connection or disable ad blockers.');
-                // Show error modal with defensive check
-                const modal = errorModal || document.getElementById('error-modal');
-                if (modal) {
-                    modal.classList.remove('hidden');
-                } else {
-                    console.error('Error modal not found! Please reload the page.');
+                // Use shared error modal display function
+                if (typeof window.showThreeJsErrorModal === 'function') {
+                    window.showThreeJsErrorModal();
                 }
                 return false;
             }
